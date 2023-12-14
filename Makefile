@@ -1,7 +1,8 @@
 CC = gcc
 CPP = g++
 LIB = ./lib
-CFLAGS = -O0 -I$(LIB) -Wall -Wextra -g
+PROCESSPOOL = ./threadpool
+CFLAGS = -O0 -I$(LIB) -I$(PROCESSPOOL) -Wall -Wextra -g
 SHARED_FLAGS = -shared -fpic
 
 target = $(patsubst $(LIB)/%.c,%.so,$(wildcard $(LIB)/*.c))
