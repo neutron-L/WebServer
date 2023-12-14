@@ -8,7 +8,7 @@ target = $(patsubst $(LIB)/%.c,%.so,$(wildcard $(LIB)/*.c))
 
 .PHONY: all clean
 
-all: ${target}
+all: ${target} server
 	@echo "compile all shared library"
 	@echo ${target}
 # 编译动态库
@@ -23,6 +23,6 @@ signal_functions.so: $(LIB)/signal_functions.c $(LIB)/signal_functions.h error_f
 	$(CC) $(CFLAGS) $(SHARED_FLAGS) -o $(LIB)/$@ $< $(LIB)/error_functions.so
 
 server: server.cc $(LIB)/*
-	$(CPP) $^ $(CFLAGS) -lpthread -o $@
+	$(CPP) $< $(CFLAGS) -lpthread -o $@
 clean:
 	-rm $(LIB)/*.so server
