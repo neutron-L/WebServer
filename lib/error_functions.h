@@ -4,9 +4,12 @@
 */
 #ifndef ERROR_FUNCTIONS_H
 #define ERROR_FUNCTIONS_H
-
 /* Error diagnostic routines */
 
+#ifdef _cplusplus
+extern "C"
+{
+#endif
 void errMsg(const char *format, ...);
 
 #ifdef __GNUC__
@@ -32,4 +35,7 @@ void usageErr(const char *format, ...) NORETURN ;
 
 void cmdLineErr(const char *format, ...) NORETURN ;
 
+#ifdef _cplusplus
+}
+#endif
 #endif
