@@ -9,34 +9,26 @@
 
 #define SERVER_PORT 8088
 
-class FileConn
+class FileConn : public Conn
 {
 private:
     static const int bufsize = 1024;
-    static int epollfd;
     static const char *const errinfo;
-    int sockfd;
-    sockaddr_in address;
     char inbuf[bufsize];
     char outbuf[bufsize];
 
 public:
     FileConn() {}
     ~FileConn() {}
-    void init(int epfd, int sockfd, const sockaddr_in &addr)
-    {
-        epollfd = epfd;
-        this->sockfd = sockfd;
-        address = addr;
-    }
-    void process()
+    
+    bool process() 
     {
         int ret;
         struct stat st;
 
-        ret = recv(sockfd, inbuf, sizeof(inbuf), 0);
+        ret = recv(sockfd, (void *)inbuf, sizeof(inbuf), 0);
         if (ret <= 0)
-            return;
+            return false;
         int fd = open(inbuf, O_RDONLY);
         if (fd < 0)
         {
@@ -45,18 +37,26 @@ public:
             send(sockfd, outbuf, strlen(outbuf), 0);
         }
         else if (fstat(fd, &st) < 0)
+        {
             perror("fstat");
+        }
         else
             sendfile(sockfd, fd, 0, st.st_size);
         close(fd);
-        // removefd(epollfd, sockfd);
+        // 注释该行，使用定时器完成关闭
+        // removefd(epollfd, sockfd); 
+        return true;
+    }
+
+    void cb_func() const
+    {
+        send(sockfd, "Bye\n", 4, 0);
+        removefd(epollfd, sockfd); 
     }
 };
 
 const char *const FileConn::errinfo = "No such file '%s'\n";
-;
 
-int FileConn::epollfd = -1;
 
 int main()
 {
