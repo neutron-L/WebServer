@@ -9,6 +9,7 @@
 
 #define SERVER_PORT 8088
 
+/// @brief 希望通过进程池执行的工作逻辑都必须封装成类并继承自Conn
 class FileConn : public Conn
 {
 private:
