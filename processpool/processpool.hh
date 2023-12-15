@@ -86,7 +86,7 @@ private:
     int epollfd;
 
     bool stop{false};
-    sort_timer_lst<T> timer_lst{};
+    timer_wheel<T> timer_lst{};
     Process *sub_process;
 
     // 构造函数为私有，以支持单例模式
@@ -127,6 +127,7 @@ ProcessPool<T>::ProcessPool(int lsfd, int proc_num)
     sub_process = new Process[proc_num];
     assert(sub_process);
 
+    int ret;
     for (int i = 0; i < proc_num; ++i)
     {
         assert(!socketpair(PF_UNIX, SOCK_STREAM, 0, sub_process[i].pipefd));
@@ -172,7 +173,7 @@ template <typename T>
 void ProcessPool<T>::timer_handler()
 {
     timer_lst.tick();
-    alarm(timer_lst.getTimeSlot());
+    // alarm(timer_lst.getTimeSlot());
 }
 
 template <typename T>
@@ -206,7 +207,7 @@ void ProcessPool<T>::run_child()
     int ret;
     bool timeout = false;
 
-    alarm(timer_lst.getTimeSlot());
+    // alarm(timer_lst.getTimeSlot());
 
     printf("Child %d wait...\n", idx);
     while (!stop)
@@ -226,7 +227,7 @@ void ProcessPool<T>::run_child()
             // 来自父进程的管道
             if (sockfd == pipefd)
             {
-                int nouse=1;
+                int nouse;
                 ret = recv(sockfd, &nouse, sizeof(nouse), 0);
                 if ((ret < 0 && (errno != EAGAIN)) || ret == 0)
                     continue;
@@ -238,7 +239,6 @@ void ProcessPool<T>::run_child()
                     perror("accept");
                     continue;
                 }
-                printf("Recv: \n");
                 addfd(epollfd, connfd);
                 users[connfd].data.init(epollfd, connfd, client);
 
@@ -323,6 +323,7 @@ void ProcessPool<T>::run_parent()
     setup_sig_pipe();
 
     // 子进程通过idx找到与父进程通信的管道
+    int pipefd = sub_process[idx].pipefd[0];
 
     addfd(epollfd, listenfd);
     epoll_event events[max_event_number];
