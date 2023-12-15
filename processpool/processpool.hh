@@ -126,7 +126,6 @@ ProcessPool<T>::ProcessPool(int lsfd, int proc_num)
     sub_process = new Process[proc_num];
     assert(sub_process);
 
-    int ret;
     for (int i = 0; i < proc_num; ++i)
     {
         assert(!socketpair(PF_UNIX, SOCK_STREAM, 0, sub_process[i].pipefd));
@@ -322,7 +321,7 @@ void ProcessPool<T>::run_parent()
     setup_sig_pipe();
 
     // 子进程通过idx找到与父进程通信的管道
-    int pipefd = sub_process[idx].pipefd[0];
+    int pipefd = sub_process[idx].pipefd[1];
 
     addfd(epollfd, listenfd);
     epoll_event events[max_event_number];
@@ -368,7 +367,7 @@ void ProcessPool<T>::run_parent()
                 }
 
                 counter = (counter + 1) % process_number;
-                send(sub_process[j].pipefd[1], &new_conn, sizeof(new_conn), 0);
+                send(pipefd, &new_conn, sizeof(new_conn), 0);
                 printf("send request to child %d\n", j);
             }
             // 处理信号
