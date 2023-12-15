@@ -1,8 +1,9 @@
 CC = gcc
 CPP = g++
 LIB = ./lib
-PROCESSPOOL = ./threadpool
-CFLAGS = -O0 -I$(LIB) -I$(PROCESSPOOL) -Wall -Wextra -g
+PROCESSPOOL = ./processpool
+TIMER = ./timer
+CFLAGS = -O0 -I$(LIB) -I$(PROCESSPOOL) -I$(TIMER) -Wall -Wextra -g
 SHARED_FLAGS = -shared -fpic
 
 target = $(patsubst $(LIB)/%.c,%.so,$(wildcard $(LIB)/*.c))
@@ -23,7 +24,7 @@ error_functions.so: $(LIB)/error_functions.c $(LIB)/error_functions.h $(LIB)/tls
 signal_functions.so: $(LIB)/signal_functions.c $(LIB)/signal_functions.h error_functions.so $(LIB)/tlsp_hdr.h
 	$(CC) $(CFLAGS) $(SHARED_FLAGS) -o $(LIB)/$@ $< $(LIB)/error_functions.so
 
-server: server.cc $(LIB)/*
+server: server.cc $(LIB)/* $(PROCESSPOOL)/* $(TIMER)/*
 	$(CPP) $< $(CFLAGS) -lpthread -o $@
 clean:
 	-rm $(LIB)/*.so server
