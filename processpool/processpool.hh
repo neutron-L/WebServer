@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 
 #include "lst_timer.hh"
+#include "wheel_timer.hh"
 
 static int setnonblocking(int fd);
 static void addfd(int epollfd, int fd);
@@ -85,7 +86,7 @@ private:
     int epollfd;
 
     bool stop{false};
-    timer_wheel<T> timer_lst{};
+    sort_timer_lst<T> timer_lst{};
     Process *sub_process;
 
     // 构造函数为私有，以支持单例模式
@@ -225,7 +226,7 @@ void ProcessPool<T>::run_child()
             // 来自父进程的管道
             if (sockfd == pipefd)
             {
-                int nouse;
+                int nouse=1;
                 ret = recv(sockfd, &nouse, sizeof(nouse), 0);
                 if ((ret < 0 && (errno != EAGAIN)) || ret == 0)
                     continue;
@@ -237,6 +238,7 @@ void ProcessPool<T>::run_child()
                     perror("accept");
                     continue;
                 }
+                printf("Recv: \n");
                 addfd(epollfd, connfd);
                 users[connfd].data.init(epollfd, connfd, client);
 
@@ -321,7 +323,6 @@ void ProcessPool<T>::run_parent()
     setup_sig_pipe();
 
     // 子进程通过idx找到与父进程通信的管道
-    int pipefd = sub_process[idx].pipefd[1];
 
     addfd(epollfd, listenfd);
     epoll_event events[max_event_number];
@@ -367,7 +368,7 @@ void ProcessPool<T>::run_parent()
                 }
 
                 counter = (counter + 1) % process_number;
-                send(pipefd, &new_conn, sizeof(new_conn), 0);
+                send(sub_process[j].pipefd[1], &new_conn, sizeof(new_conn), 0);
                 printf("send request to child %d\n", j);
             }
             // 处理信号

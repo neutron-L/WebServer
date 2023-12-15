@@ -26,6 +26,7 @@ public:
     {
         int ret;
         struct stat st;
+        bzero(inbuf, sizeof(inbuf));
 
         ret = recv(sockfd, (void *)inbuf, sizeof(inbuf), 0);
         if (ret <= 0)
