@@ -16,6 +16,7 @@ public:
     static const int kBufferSize = 2048;
 
     // http方法，目前只支持GET
+    // 采用宏定义的格式命名，和http保持一致
     enum class Method
     {
         GET, POST, HEAD, PUT, DELETE, TRACE,OPTIONS
@@ -23,7 +24,7 @@ public:
 
     // HTTP请求解析的状态
     enum class CheckStatus{
-        
+        kCheckRequestLine, kCheckHeader, kCheckContent
     };
 
     // 返回的状态码
