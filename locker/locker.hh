@@ -1,5 +1,5 @@
-#ifndef THREADPOOL_HH_
-#define THREADPOOL_HH_
+#ifndef LOCKER_HH_
+#define LOCKER_HH_
 
 #include <iostream>
 #include <exception>

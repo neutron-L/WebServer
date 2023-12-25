@@ -3,7 +3,9 @@ CPP = g++
 LIB = ./lib
 PROCESSPOOL = ./processpool
 TIMER = ./timer
-CFLAGS = -O0 -I$(LIB) -I$(PROCESSPOOL) -I$(TIMER) -Wall -Wextra -g
+LOCKER = ./locker
+HTTP = ./http
+CFLAGS = -O0 -I$(LIB) -I$(PROCESSPOOL) -I$(TIMER) -I$(LOCKER) -I$(HTTP) -Wall -Wextra -g
 SHARED_FLAGS = -shared -fpic
 
 target = $(patsubst $(LIB)/%.c,%.so,$(wildcard $(LIB)/*.c))
